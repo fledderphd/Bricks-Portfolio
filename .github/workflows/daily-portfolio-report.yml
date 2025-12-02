@@ -1,0 +1,73 @@
+name: Daily Portfolio Report
+
+on:
+  # Run daily at 9 AM EST (2 PM UTC)
+  schedule:
+    - cron: '0 14 * * *'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  send-portfolio-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-ansi
+      
+      - name: Create config directory
+        run: mkdir -p config
+      
+      - name: Set up Google credentials
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          GOOGLE_TOKEN: ${{ secrets.GOOGLE_TOKEN }}
+        run: |
+          echo "$GOOGLE_CREDENTIALS" > config/credentials.json
+          echo "$GOOGLE_TOKEN" | base64 -d > config/token.pickle
+      
+      - name: Create .env file
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          GOOGLE_SHEET_RANGE: ${{ secrets.GOOGLE_SHEET_RANGE }}
+          EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
+          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          cat << EOF > .env
+          GOOGLE_SHEET_ID=${GOOGLE_SHEET_ID}
+          GOOGLE_SHEET_RANGE=${GOOGLE_SHEET_RANGE}
+          EMAIL_SMTP_SERVER=${EMAIL_SMTP_SERVER}
+          EMAIL_SMTP_PORT=${EMAIL_SMTP_PORT}
+          EMAIL_FROM=${EMAIL_FROM}
+          EMAIL_PASSWORD=${EMAIL_PASSWORD}
+          EMAIL_TO=${EMAIL_TO}
+          EOF
+      
+      - name: Run daily portfolio report
+        run: |
+          poetry run python daily_portfolio_report.py
+      
+      - name: Clean up credentials
+        if: always()
+        run: |
+          rm -f config/credentials.json
+          rm -f config/token.pickle
+          rm -f .env
