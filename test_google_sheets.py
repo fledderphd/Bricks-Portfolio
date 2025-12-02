@@ -12,11 +12,19 @@ Usage:
 import sys
 import logging
 from pathlib import Path
+import importlib.util
 
 # Add EigenLedger to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from EigenLedger.modules.google_auth import GoogleSheetsClient
+# Import directly from google_auth module file to avoid package __init__.py
+spec = importlib.util.spec_from_file_location(
+    "google_auth",
+    Path(__file__).parent / "EigenLedger" / "modules" / "google_auth.py"
+)
+google_auth = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(google_auth)
+GoogleSheetsClient = google_auth.GoogleSheetsClient
 
 # Configure logging
 logging.basicConfig(

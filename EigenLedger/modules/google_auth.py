@@ -226,7 +226,7 @@ if __name__ == "__main__":
     
     # This will run the OAuth flow when executed directly
     client = GoogleSheetsClient()
-client.authenticate()
+    client.authenticate()
     
     print("Authentication successful!")
     print("You can now use this client to read Google Sheets.")
