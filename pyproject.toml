@@ -8,7 +8,7 @@ license = "LICENSE"
 homepage = "https://github.com/ssantoshp/EigenLedger"
 
 [tool.poetry.dependencies]
-python = ">=3.0"
+python = "^3.8"
 numpy = "^1.21.0"
 matplotlib = "^3.4.0"
 quantstats = "^0.0.62"
@@ -16,6 +16,11 @@ yfinance = "^0.1.0"
 ipython = "^7.16.0"
 fpdf = "^1.7.2"
 pyportfolioopt = "^1.4.0"
+google-auth-oauthlib = "^1.1.0"
+google-auth-httplib2 = "^0.1.1"
+google-api-python-client = "^2.108.0"
+python-dotenv = "^1.0.0"
+jinja2 = "^3.1.0"
 
 [[tool.poetry.packages]]
 include = "EigenLedger"
